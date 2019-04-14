@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>植物大战僵尸</title>
+    </head>
+
+    <body>
+        <div id="stage" style="margin: 0 auto; width: 876px; height: 440px; text-align: center; vertical-align: middle" >
+            <canvas 
+                onmousemove="moveFlower(event)" 
+                onclick="shoot()"
+                id="canvas" style="border:2px solid red;" width="876" height="440">
+                不支持画板对象
+            </canvas>
+        </div>
+        <script>
+			var canvas = document.getElementById('canvas');
+			var ctx = canvas.getContext('2d');
+			var background = new Image();
+			background.src = "images/bg.png";
+			var imgz1 = new Image();
+			imgz1.src = "images/zombie1.png";
+			var imgz2 = new Image();
+			imgz2.src = "images/zombie2.png";
+			var imgz3 = new Image();
+			imgz3.src = "images/zombie3.png";
+			var imgf2 = new Image();
+			imgf2.src = "images/flower2.png";
+            var imgbullet=new Image();
+            imgbullet.src = "images/bullet.png"
+            function Bullet(x, y,img){
+                this.x=x;
+                this.y=y;
+                this.img=img;
+                this.isHit=false;
+                this.paint = function(ctx) {
+                    if(!this.isHit){
+                        ctx.drawImage(this.img, this.x, this.y);
+                    }
+                }
+                this.step = function() {
+                    this.x += 10;
+                }
+            }
+			function Zombie(x, y, type, life, score, img) {
+				this.x = x;
+				this.y = y;
+
+				this.type = type;
+				this.life = life;
+				this.score = score;
+				this.img = img;
+				this.width=img.width;
+				this.height=img.height;
+				this.isHit=false;
+				this.checkHit=function(bullets){
+				  for(var i=0;i<bullets.length;i++){
+				      var bx=bullets[i].x;
+				      var by=bullets[i].y;
+				      if(this.x<bx&&bx<this.width+this.x&&
+				          this.y<by&&by<this.height+this.y){
+				              this.isHit=true;
+				              bullets[i].isHit=true;
+				              break;
+				          }
+				  }  
+				}
+				this.paint = function(ctx) {
+				    if(!this.isHit){
+				        ctx.drawImage(this.img, this.x, this.y);
+				    }
+				}
+				this.step = function() {
+					this.x -= 2;
+				}
+			}
+
+			function Flower(img, x, y) {
+				this.img = img;
+				this.x = x
+				this.y = y
+				this.paint = function(ctx) {
+					ctx.drawImage(this.img, this.x, this.y);
+				}
+			}
+
+			var zombies = [];
+			var bullets=[];
+			var f2 = new Flower(imgf2, 120, 180);
+			setInterval(function() {
+				ctx.drawImage(background, 0, 0);
+				f2.paint(ctx);
+				for(var i=0;i<bullets.length;i++){
+				    bullets[i].paint(ctx);
+                    bullets[i].step();
+				}
+
+				for (var i = 0; i < zombies.length; i++) {
+					zombies[i].paint(ctx);
+					zombies[i].step();
+				}
+			}, 50);
+
+			setInterval(function() {
+				var z;
+				var type = Math.random() * 10;
+				if (type < 6) {
+					z = new Zombie(860, Math.random() * 310, 1, 1, 20, imgz1);
+				} else if (type < 8) {
+					z = new Zombie(860, Math.random() * 310, 2, 2, 25, imgz2);
+				} else {
+					z = new Zombie(860, Math.random() * 310, 3, 3, 35, imgz3);
+				}
+
+				zombies.splice(zombies.length, 0, z);
+			}, 4000);
+
+			function moveFlower(event) {
+				f2.y = event.clientY - 10;
+			}
+            function shoot(){
+                var b=new Bullet(170,f2.y,imgbullet);
+                bullets.splice(bullets.length, 0, b);
+            }
+            
+        </script>
+    </body>
+</html>
